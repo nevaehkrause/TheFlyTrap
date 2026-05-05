@@ -10,12 +10,28 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import tweetsData from "./data/tweets.json";
 import type{ Tweet } from "./types/tweet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "./utils/supabase";
+
 
 function App() {
-  const [tweets, setTweets] = useState<Tweet[]>(tweetsData as Tweet[]);
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+
+  useEffect(() => {
+  async function load() {
+    const { data, error } = await supabase
+      .from("tweets")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) console.error(error);
+    else setTweets(data || []);
+  }
+
+  load();
+}, []);
+
 
   // Save the current time once during this render.
   const currentTime = new Date().toISOString();
